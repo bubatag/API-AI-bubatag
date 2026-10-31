@@ -1,4 +1,3 @@
-
 const bubalinoService = require('../services/bubalinoService');
 
 exports.cadastrar = async (req, res, next) => {
@@ -41,6 +40,7 @@ exports.atualizar = async (req, res, next) => {
   }
 };
 
+// Desativa o bubalino, mantendo seu cadastro e histórico.
 exports.excluir = async (req, res, next) => {
   try {
     const usuarioId = req.usuario.id || req.usuario._id;
@@ -59,6 +59,7 @@ exports.excluir = async (req, res, next) => {
   }
 };
 
+// Reativa um bubalino anteriormente desativado.
 exports.reativar = async (req, res, next) => {
   try {
     const usuarioId = req.usuario.id || req.usuario._id;
@@ -77,6 +78,28 @@ exports.reativar = async (req, res, next) => {
   }
 };
 
+// Exclui permanentemente o bubalino,
+// preservando seus dados no arquivo histórico.
+exports.excluirPermanentemente = async (req, res, next) => {
+  try {
+    const usuarioId = req.usuario.id || req.usuario._id;
+
+    const resultado =
+      await bubalinoService.excluirPermanentemente(
+        usuarioId,
+        req.params.id
+      );
+
+    res.status(200).json({
+      sucesso: true,
+      ...resultado
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Desvincula o bubalino da coleira sem apagar seu cadastro.
 exports.desvincular = async (req, res, next) => {
   try {
     const usuarioId = req.usuario.id || req.usuario._id;

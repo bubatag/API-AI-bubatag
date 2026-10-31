@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const DadoBiometricoSchema = new mongoose.Schema({
@@ -160,6 +159,44 @@ const ColeiraSchema = new mongoose.Schema({
   }
 });
 
+// Estrutura para armazenar bubalinos excluídos permanentemente.
+const BubalinoExcluidoSchema = new mongoose.Schema(
+  {
+    id_original: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    cadastro: {
+      type: BubalinoSchema,
+      required: true
+    },
+    data_exclusao: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: false }
+);
+
+// Estrutura para armazenar coleiras excluídas permanentemente.
+const ColeiraExcluidaSchema = new mongoose.Schema(
+  {
+    id_original: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    cadastro: {
+      type: ColeiraSchema,
+      required: true
+    },
+    data_exclusao: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: false }
+);
+
 const UsuarioSchema = new mongoose.Schema(
   {
     nome: {
@@ -189,9 +226,23 @@ const UsuarioSchema = new mongoose.Schema(
       default: []
     },
 
-    // Os animais agora existem independentemente das coleiras.
+    // Os animais existem independentemente das coleiras.
     bubalinos: {
       type: [BubalinoSchema],
+      default: []
+    },
+
+    // Arquivo histórico de bubalinos excluídos permanentemente.
+    // Esses registros ficam disponíveis somente para consulta.
+    bubalinos_excluidos: {
+      type: [BubalinoExcluidoSchema],
+      default: []
+    },
+
+    // Arquivo histórico de coleiras excluídas permanentemente.
+    // Esses registros ficam disponíveis somente para consulta.
+    coleiras_excluidas: {
+      type: [ColeiraExcluidaSchema],
       default: []
     }
   },

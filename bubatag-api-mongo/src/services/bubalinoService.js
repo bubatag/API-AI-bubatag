@@ -1,4 +1,3 @@
-
 const Usuario = require('../models/Usuario');
 const coleiraService = require('./coleiraService');
 
@@ -257,6 +256,59 @@ class BubalinoService {
     return {
       mensagem: 'Bubalino reativado com sucesso.',
       bubalino,
+    };
+  }
+
+  // Exclui permanentemente um bubalino do cadastro operacional,
+  // preservando seus dados e históricos para consulta.
+  async excluirPermanentemente(usuarioId, bubalinoId) {
+    const usuario = await Usuario.findById(usuarioId);
+
+    if (!usuario) {
+      throw criarErro('Usuário não encontrado.', 404);
+    }
+
+    const { bubalino, coleira } = localizarBubalino(
+      usuario,
+      bubalinoId
+    );
+
+    if (bubalino.ativo !== false) {
+      throw criarErro(
+        'Desative o bubalino antes de excluí-lo permanentemente.',
+        400
+      );
+    }
+
+    const dataExclusao = new Date();
+
+    // Cria uma cópia completa do cadastro antes de removê-lo.
+    const cadastroArquivado = bubalino.toObject();
+
+    cadastroArquivado.excluido_em = dataExclusao;
+
+    // Encerra o vínculo atual, preservando o histórico na coleira.
+    if (coleira) {
+      encerrarVinculo(coleira, bubalino._id);
+    }
+
+    // Guarda o cadastro completo no arquivo histórico.
+    usuario.bubalinos_excluidos.push({
+      id_original: bubalino._id,
+      cadastro: cadastroArquivado,
+      data_exclusao: dataExclusao,
+    });
+
+    // Remove o animal somente da lista operacional.
+    usuario.bubalinos.pull(bubalino._id);
+
+    await usuario.save();
+
+    return {
+      mensagem:
+        'Bubalino excluído permanentemente. Seus dados históricos foram preservados para consulta.',
+      id_original: bubalino._id,
+      data_exclusao: dataExclusao,
     };
   }
 

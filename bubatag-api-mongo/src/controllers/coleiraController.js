@@ -1,4 +1,3 @@
-
 const coleiraService = require('../services/coleiraService');
 
 function validarUsuarioDaRota(req, res) {
@@ -153,6 +152,25 @@ exports.reativar = async (req, res, next) => {
   }
 };
 
+// Exclui permanentemente uma coleira, preservando seu histórico.
+exports.excluirPermanentemente = async (req, res, next) => {
+  try {
+    if (!validarUsuarioDaRota(req, res)) return;
+
+    const resultado = await coleiraService.excluirPermanentemente(
+      req.params.usuarioId,
+      req.params.coleiraId
+    );
+
+    res.status(200).json({
+      sucesso: true,
+      ...resultado
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Desvincula o bubalino sem apagar seu cadastro ou histórico.
 exports.desvincularBubalino = async (req, res, next) => {
   try {
@@ -189,3 +207,4 @@ exports.obterAlertas = async (req, res, next) => {
     next(error);
   }
 };
+

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 
@@ -59,6 +58,14 @@ router.delete(
   '/usuario/:usuarioId/:coleiraId',
   authMiddleware,
   coleiraController.excluir
+);
+
+// Exclui permanentemente uma coleira inativa e desvinculada,
+// preservando seu cadastro e histórico para consulta.
+router.delete(
+  '/usuario/:usuarioId/:coleiraId/permanente',
+  authMiddleware,
+  coleiraController.excluirPermanentemente
 );
 
 // Reativa uma coleira anteriormente desativada.

@@ -1,4 +1,3 @@
-
 const Usuario = require('../models/Usuario');
 
 function criarErro(mensagem, status) {
@@ -327,6 +326,62 @@ class ColeiraService {
     };
   }
 
+  // Exclui permanentemente uma coleira,
+  // preservando seu cadastro e histórico para consulta.
+  async excluirPermanentemente(usuarioId, coleiraId) {
+    const usuario = await Usuario.findById(usuarioId);
+
+    if (!usuario) {
+      throw criarErro('Usuário não encontrado.', 404);
+    }
+
+    const coleira = usuario.coleiras.id(coleiraId);
+
+    if (!coleira) {
+      throw criarErro('Coleira não encontrada.', 404);
+    }
+
+    if (coleira.ativo !== false) {
+      throw criarErro(
+        'Desative a coleira antes de excluí-la permanentemente.',
+        400
+      );
+    }
+
+    if (coleira.bubalino_id) {
+      throw criarErro(
+        'Desvincule o bubalino antes de excluir permanentemente a coleira.',
+        400
+      );
+    }
+
+    const dataExclusao = new Date();
+
+    // Copia o cadastro completo, incluindo o histórico de vínculos.
+    const cadastroArquivado = coleira.toObject();
+
+    cadastroArquivado.excluido_em = dataExclusao;
+
+    // Guarda a coleira no arquivo histórico.
+    usuario.coleiras_excluidas.push({
+      id_original: coleira._id,
+      cadastro: cadastroArquivado,
+      data_exclusao: dataExclusao,
+    });
+
+    // Remove a coleira somente do cadastro operacional.
+    usuario.coleiras.pull(coleira._id);
+
+    await usuario.save();
+
+    return {
+      mensagem:
+        'Coleira excluída permanentemente. Seus dados históricos foram preservados para consulta.',
+      id_original: coleira._id,
+      data_exclusao: dataExclusao,
+    };
+  }
+
   // Desvincula o bubalino sem apagar seu cadastro ou histórico.
   async desvincularBubalino(usuarioId, coleiraId) {
     const usuario = await Usuario.findById(usuarioId);
@@ -478,3 +533,4 @@ class ColeiraService {
 }
 
 module.exports = new ColeiraService();
+
