@@ -26,13 +26,20 @@ class StressAnalyzer {
       throw erroServico;
     }
 
-    if (!resposta.ok) {
-      const erroServico = new Error(
-        'Não foi possível classificar os dados do animal.'
-      );
-      erroServico.status = 503;
-      throw erroServico;
-    }
+   if (!resposta.ok) {
+  const detalhes = await resposta.text();
+
+  console.error('[ML] Erro na classificação:', {
+    status: resposta.status,
+    resposta: detalhes,
+  });
+
+  const erroServico = new Error(
+    'Não foi possível classificar os dados do animal.'
+  );
+  erroServico.status = 503;
+  throw erroServico;
+}
 
     const resultado = await resposta.json();
     const estado = resultado.estado;
