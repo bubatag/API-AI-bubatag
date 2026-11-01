@@ -8,16 +8,34 @@ class UsuarioService {
 
   async buscarPorId(id) {
     const usuario = await Usuario.findById(id).select('-senha');
+
     if (!usuario) {
       const erro = new Error('Usuário não encontrado.');
       erro.status = 404;
       throw erro;
     }
+
     return usuario;
+  }
+
+  async listarBubalinos(usuarioId) {
+    const usuario = await Usuario.findById(usuarioId)
+      .select('bubalinos');
+
+    if (!usuario) {
+      const erro = new Error('Usuário não encontrado.');
+      erro.status = 404;
+      throw erro;
+    }
+
+    return usuario.bubalinos.filter(
+      (bubalino) => !bubalino.excluido_em
+    );
   }
 
   async criarUsuario(dados) {
     const emailExiste = await Usuario.findOne({ email: dados.email });
+
     if (emailExiste) {
       const erro = new Error('E-mail já cadastrado.');
       erro.status = 400;
@@ -29,11 +47,13 @@ class UsuarioService {
 
     const resposta = novoUsuario.toObject();
     delete resposta.senha;
+
     return resposta;
   }
 
   async autenticar(email, senha) {
     const usuario = await Usuario.findOne({ email });
+
     if (!usuario) {
       const erro = new Error('Credenciais inválidas.');
       erro.status = 401;

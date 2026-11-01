@@ -4,9 +4,14 @@ const router = express.Router();
 const bubalinoController = require('../controllers/bubalinoController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+// Lista os bubalinos do usuário autenticado.
+router.get('/', authMiddleware, bubalinoController.listar);
+
 router.post('/', authMiddleware, bubalinoController.cadastrar);
 router.put('/:id', authMiddleware, bubalinoController.atualizar);
+
 router.delete('/:id', authMiddleware, bubalinoController.excluir);
+
 router.delete(
   '/:id/permanente',
   authMiddleware,
@@ -15,4 +20,5 @@ router.delete(
 
 router.patch('/:id/reativar', authMiddleware, bubalinoController.reativar);
 router.patch('/:id/desvincular', authMiddleware, bubalinoController.desvincular);
+
 module.exports = router;

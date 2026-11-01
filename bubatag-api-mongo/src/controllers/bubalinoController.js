@@ -1,4 +1,22 @@
+
 const bubalinoService = require('../services/bubalinoService');
+const usuarioService = require('../services/usuarioService');
+
+// Lista os bubalinos independentemente de estarem vinculados a coleiras.
+exports.listar = async (req, res, next) => {
+  try {
+    const usuarioId = req.usuario.id || req.usuario._id;
+
+    const bubalinos = await usuarioService.listarBubalinos(usuarioId);
+
+    res.status(200).json({
+      sucesso: true,
+      bubalinos,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.cadastrar = async (req, res, next) => {
   try {
@@ -13,7 +31,7 @@ exports.cadastrar = async (req, res, next) => {
       sucesso: true,
       mensagem: 'Bubalino cadastrado com sucesso.',
       bubalino: resultado.bubalino,
-      coleira: resultado.coleira
+      coleira: resultado.coleira,
     });
   } catch (error) {
     next(error);
@@ -33,7 +51,7 @@ exports.atualizar = async (req, res, next) => {
     res.status(200).json({
       sucesso: true,
       mensagem: 'Bubalino atualizado com sucesso.',
-      bubalino
+      bubalino,
     });
   } catch (error) {
     next(error);
@@ -52,7 +70,7 @@ exports.excluir = async (req, res, next) => {
 
     res.status(200).json({
       sucesso: true,
-      ...resultado
+      ...resultado,
     });
   } catch (error) {
     next(error);
@@ -71,7 +89,7 @@ exports.reativar = async (req, res, next) => {
 
     res.status(200).json({
       sucesso: true,
-      ...resultado
+      ...resultado,
     });
   } catch (error) {
     next(error);
@@ -92,7 +110,7 @@ exports.excluirPermanentemente = async (req, res, next) => {
 
     res.status(200).json({
       sucesso: true,
-      ...resultado
+      ...resultado,
     });
   } catch (error) {
     next(error);
@@ -111,7 +129,7 @@ exports.desvincular = async (req, res, next) => {
 
     res.status(200).json({
       sucesso: true,
-      ...resultado
+      ...resultado,
     });
   } catch (error) {
     next(error);
