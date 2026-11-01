@@ -1,3 +1,4 @@
+
 const Usuario = require('../models/Usuario');
 const coleiraService = require('./coleiraService');
 
@@ -169,7 +170,6 @@ class BubalinoService {
       throw criarErro('A coleira está inativa.', 400);
     }
 
-    // Troca o vínculo somente quando a coleira de destino for diferente.
     if (
       !coleiraAtual ||
       String(coleiraDestino._id) !== String(coleiraAtual._id)
@@ -259,8 +259,7 @@ class BubalinoService {
     };
   }
 
-  // Exclui permanentemente um bubalino do cadastro operacional,
-  // preservando seus dados e históricos para consulta.
+  // Exclui permanentemente o bubalino e encerra todos os vínculos.
   async excluirPermanentemente(usuarioId, bubalinoId) {
     const usuario = await Usuario.findById(usuarioId);
 
@@ -268,10 +267,12 @@ class BubalinoService {
       throw criarErro('Usuário não encontrado.', 404);
     }
 
-    const { bubalino, coleira } = localizarBubalino(
-      usuario,
-      bubalinoId
-    );
+    // Localiza o animal sem depender da existência de uma coleira.
+    const bubalino = usuario.bubalinos.id(bubalinoId);
+
+    if (!bubalino || bubalino.excluido_em) {
+      throw criarErro('Bubalino não encontrado.', 404);
+    }
 
     if (bubalino.ativo !== false) {
       throw criarErro(
@@ -282,24 +283,29 @@ class BubalinoService {
 
     const dataExclusao = new Date();
 
-    // Cria uma cópia completa do cadastro antes de removê-lo.
+    // Copia o cadastro completo antes de removê-lo.
     const cadastroArquivado = bubalino.toObject();
-
     cadastroArquivado.excluido_em = dataExclusao;
 
-    // Encerra o vínculo atual, preservando o histórico na coleira.
-    if (coleira) {
-      encerrarVinculo(coleira, bubalino._id);
-    }
+    // Localiza todas as coleiras que apontam para este bubalino.
+    const coleirasVinculadas = (usuario.coleiras || []).filter(
+      (coleira) =>
+        String(coleira.bubalino_id || '') === String(bubalino._id)
+    );
 
-    // Guarda o cadastro completo no arquivo histórico.
+    // Encerra os vínculos e limpa as referências nas coleiras.
+    coleirasVinculadas.forEach((coleira) => {
+      encerrarVinculo(coleira, bubalino._id);
+    });
+
+    // Arquiva o cadastro completo do bubalino.
     usuario.bubalinos_excluidos.push({
       id_original: bubalino._id,
       cadastro: cadastroArquivado,
       data_exclusao: dataExclusao,
     });
 
-    // Remove o animal somente da lista operacional.
+    // Remove o animal da lista operacional.
     usuario.bubalinos.pull(bubalino._id);
 
     await usuario.save();
