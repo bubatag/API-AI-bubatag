@@ -1,4 +1,4 @@
-# 🐃 API-BUBATAG
+# 🐃 API-AI-BUBATAG
 
 ### API, Inteligência Artificial e processamento de dados para o monitoramento inteligente de bubalinos.
 
