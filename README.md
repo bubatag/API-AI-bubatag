@@ -1,79 +1,183 @@
-# 🐃 Bubatag — API, Inteligência Artificial e Relatórios
+# 🐃 API-BUBATAG
 
-O **Bubatag** é um sistema de monitoramento de bubalinos que integra uma API REST, um banco de dados MongoDB e um serviço de Inteligência Artificial para processar dados de temperatura corporal e frequência cardíaca, classificar o estado do animal e apoiar o acompanhamento de seu bem-estar.
+### API, Inteligência Artificial e processamento de dados para o monitoramento inteligente de bubalinos.
 
-O projeto é organizado em serviços independentes, executados em containers Docker, facilitando a configuração do ambiente e a comunicação entre os componentes.
+O **API-BUBATAG** é o repositório responsável pela camada de comunicação, processamento e integração de dados da plataforma **BUBATAG**.
+
+Desenvolvido para apoiar o monitoramento inteligente de rebanhos bubalinos, o projeto integra uma **API REST**, banco de dados **MongoDB** e serviços de **Inteligência Artificial e Machine Learning**, permitindo receber, processar, classificar e armazenar informações fisiológicas dos animais.
+
+Por meio dessa integração, o sistema trabalha com informações como temperatura corporal e frequência cardíaca, auxiliando na identificação de possíveis sinais de estresse e no acompanhamento do bem-estar dos animais.
+
+A arquitetura utiliza serviços independentes e containers Docker, facilitando a execução, manutenção e comunicação entre os diferentes componentes da aplicação.
 
 ---
 
-## 🏗️ Arquitetura do sistema
+## 🎯 Objetivo
+
+Desenvolver uma infraestrutura de backend capaz de receber, processar e disponibilizar os dados utilizados pela plataforma BUBATAG.
+
+O projeto tem como principais objetivos:
+
+- Disponibilizar endpoints para comunicação entre os dispositivos IoT e a plataforma.
+- Receber e validar informações coletadas pelas coleiras inteligentes.
+- Identificar os animais e dispositivos associados aos registros.
+- Processar dados fisiológicos por meio de serviços de Inteligência Artificial.
+- Classificar possíveis condições de estresse dos animais.
+- Armazenar informações de monitoramento no MongoDB.
+- Disponibilizar dados para consultas, acompanhamento e geração de relatórios.
+- Integrar os serviços de backend com as demais aplicações do BUBATAG.
+
+## 🏗️ Arquitetura do Sistema
+
+O API-BUBATAG funciona como uma camada central de processamento e comunicação entre os dispositivos de monitoramento, os serviços de inteligência e as aplicações da plataforma.
+
+### Fluxo de comunicação
 
 ```text
-          [ Sensores / Dispositivos IoT ]
-                       |
-                       v
-              [ API Bubatag ]
-             Node.js / Express
-                 Porta 3000
-                  /       \
-                 v         v
-       [ Serviço de IA ] [ MongoDB ]
-       Python / FastAPI   Banco bubatag
-          Porta 8000      Porta interna 27017
-                 |
-                 v
-       [ Modelo de Machine Learning ]
-          classificador.joblib
+          [ Dispositivos IoT ]
+          [ Coleiras ESP32 ]
+                  |
+                  v
+          [ API-BUBATAG ]
+          Node.js / Express
+               :3000
+                  |
+          +-------+-------+
+          |               |
+          v               v
+    [ Serviço de IA ]  [ MongoDB ]
+    Python / FastAPI   Armazenamento
+        :8000          dos dados
+          |
+          v
+    [ Machine Learning ]
+    Classificação de
+    dados fisiológicos
 ```
 
-Os serviços são executados por meio do Docker Compose:
+### Serviços e tecnologias
 
-| Serviço | Tecnologia | Porta no host |
+| Serviço | Tecnologia | Porta |
 |---|---|---|
-| API | Node.js / Express | `3000` |
-| IA | Python / FastAPI | `8000` |
-| Banco de dados | MongoDB 8 | `27018` |
+| API REST | Node.js / Express | `3000` |
+| Inteligência Artificial | Python / FastAPI | `8000` |
+| Banco de dados | MongoDB 8 | `27018` (host) |
+| Machine Learning | Python / scikit-learn | Integrado ao serviço de IA |
 
-**Importante:** a API acessa o MongoDB pela rede interna do Docker utilizando `mongo:27017` e acessa o serviço de IA utilizando `http://ml-service:8000`. A porta `27018` é utilizada para acessar o MongoDB pelo Windows.
+**Comunicação interna:** os containers utilizam a rede do Docker Compose. A API acessa o MongoDB por `mongo:27017` e o serviço de IA por `http://ml-service:8000`.
 
-## 📦 Tecnologias utilizadas
+---
 
-- **Node.js e Express:** implementação da API REST.
-- **Python e FastAPI:** disponibilização do serviço de classificação por IA.
-- **scikit-learn:** execução do modelo de machine learning.
-- **pandas e joblib:** preparação dos dados e carregamento do modelo treinado.
-- **MongoDB:** persistência de usuários, coleiras, dados de telemetria e informações relacionadas ao monitoramento.
-- **Docker e Docker Compose:** construção e execução dos serviços em containers.
+## 📦 Tecnologias Utilizadas
+
+As principais tecnologias utilizadas no desenvolvimento são:
+
+| Tecnologia | Aplicação |
+|---|---|
+| Node.js | Ambiente de execução do backend. |
+| Express.js | Desenvolvimento da API REST. |
+| Python | Implementação dos serviços de inteligência. |
+| FastAPI | Disponibilização dos serviços de IA. |
+| MongoDB | Armazenamento de dados e telemetria. |
+| scikit-learn | Treinamento e execução de modelos de Machine Learning. |
+| pandas | Manipulação e preparação de dados. |
+| joblib | Armazenamento e carregamento de modelos treinados. |
+| Docker | Containerização dos serviços. |
+| Docker Compose | Orquestração e integração dos containers. |
+
+---
+
+## 📁 Organização do Repositório
+
+O projeto está organizado em diretórios independentes, cada um com uma responsabilidade específica.
+
+```text
+API-BUBATAG/
+│
+├── backup-mongodb/
+│   └── Arquivos relacionados aos backups do MongoDB
+│
+├── bubatag-ai-service/
+│   └── Serviço de Inteligência Artificial
+│
+├── bubatag-api-mongo/
+│   └── API REST e integração com MongoDB
+│
+├── bubatag-ml-service/
+│   └── Serviço e estrutura de Machine Learning
+│
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+### 🔌 bubatag-api-mongo
+
+Contém a implementação da API REST, desenvolvida com Node.js e Express.
+
+É responsável por receber requisições, validar informações, realizar operações no banco de dados e estabelecer a comunicação com o serviço de Inteligência Artificial.
+
+Entre suas responsabilidades estão:
+
+- Gerenciamento das requisições HTTP.
+- Registro e consulta de dados de telemetria.
+- Integração com o MongoDB.
+- Comunicação com o serviço de classificação.
+- Disponibilização de informações para relatórios.
+
+### 🧠 bubatag-ai-service
+
+Diretório destinado ao serviço de Inteligência Artificial do projeto.
+
+Sua finalidade é disponibilizar funcionalidades relacionadas ao processamento e à análise dos dados coletados, contribuindo para a identificação de possíveis condições de estresse nos animais.
+
+### 🤖 bubatag-ml-service
+
+Contém a estrutura relacionada ao Machine Learning, incluindo os recursos necessários para trabalhar com os modelos de classificação.
+
+O serviço utiliza informações fisiológicas, como temperatura corporal e frequência cardíaca, para realizar a classificação do estado do animal.
+
+O modelo experimental utilizado pelo serviço é armazenado no formato `.joblib`.
+
+### 🗄️ backup-mongodb
+
+Diretório destinado aos arquivos relacionados à preservação e recuperação dos dados armazenados no MongoDB.
 
 ---
 
 ## ⚙️ Pré-requisitos
 
-Antes de executar o projeto, instale:
+Antes de executar o projeto, é necessário possuir:
 
-- [Git](https://git-scm.com/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Git](https://git-scm.com/) — para clonar e versionar o repositório.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — para executar os containers.
+- Docker Compose — utilizado para orquestrar os serviços.
 
-No Windows, abra o Docker Desktop e aguarde até que o mecanismo Docker esteja em execução.
+**Observação:** não é necessário instalar manualmente Node.js, Python ou MongoDB para executar os serviços que já estão configurados em containers Docker.
 
-Não é necessário instalar manualmente Node.js, Python ou MongoDB para executar os serviços dockerizados, pois cada container utiliza sua própria imagem.
+No Windows, certifique-se de que o Docker Desktop esteja aberto e funcionando antes de iniciar o projeto.
 
 ---
 
-## 🚀 Como executar o projeto
+## 🚀 Como Executar o Projeto
 
 ### 1. Clonar o repositório
 
-Se o projeto ainda não estiver na sua máquina:
+Abra o terminal e execute:
 
 ```bash
 git clone https://github.com/bubatag/API-bubatag.git
+```
+
+Acesse a pasta:
+
+```bash
 cd API-bubatag
 ```
 
-### 2. Entrar na pasta da API
+### 2. Acessar o diretório principal da API
 
-O arquivo `docker-compose.yml` utilizado para subir os serviços está na pasta `bubatag-api-mongo`.
+O arquivo `docker-compose.yml` responsável pela inicialização dos serviços está localizado em `bubatag-api-mongo`.
 
 ```bash
 cd bubatag-api-mongo
@@ -81,54 +185,56 @@ cd bubatag-api-mongo
 
 ### 3. Configurar as variáveis de ambiente
 
-A API utiliza um arquivo `.env` para fornecer configurações sensíveis, como o segredo JWT.
+A API utiliza variáveis de ambiente para configurações importantes, incluindo o segredo de autenticação JWT.
 
-Verifique se existe um arquivo `.env` nessa pasta e se a variável `JWT_SECRET` está configurada. Se necessário, utilize o arquivo de exemplo do projeto como referência.
-
-Exemplo de configuração:
+Verifique a existência do arquivo `.env` e configure a variável:
 
 ```env
 JWT_SECRET=seu_segredo_local
 ```
 
-Substitua o valor de exemplo por um segredo próprio. Não publique credenciais ou segredos reais no GitHub.
+Substitua o valor de exemplo por um segredo próprio.
 
-A URL do MongoDB e a URL interna do serviço de IA já são configuradas no Docker Compose:
+**Importante:** nunca compartilhe credenciais, tokens ou segredos reais em repositórios públicos.
 
-```text
+As configurações de comunicação interna com o MongoDB e o serviço de IA são:
+
+```env
 MONGO_URI=mongodb://mongo:27017/bubatag
 ML_SERVICE_URL=http://ml-service:8000
 ```
 
-Esses endereços são utilizados entre os containers. Não devem ser trocados por `localhost` dentro da configuração de comunicação entre os serviços.
+Esses endereços são utilizados dentro da rede Docker e devem permanecer compatíveis com a configuração do `docker-compose.yml`.
 
-### 4. Construir e iniciar os containers
+### 4. Construir e iniciar os serviços
 
-Execute na pasta `bubatag-api-mongo`:
+Execute o comando dentro da pasta `bubatag-api-mongo`:
 
 ```bash
 docker compose up -d --build
 ```
 
-O comando constrói as imagens necessárias e inicia os serviços em segundo plano.
+Esse comando realiza a construção das imagens e inicia os serviços em segundo plano.
 
 ### 5. Verificar os containers
+
+Para conferir se os serviços foram iniciados corretamente:
 
 ```bash
 docker compose ps
 ```
 
-Os serviços esperados são:
+Os containers esperados são:
 
 - `bubatag-api`
 - `bubatag-ml-service`
 - `bubatag-mongo`
 
-Verifique se os três apresentam status `Up`.
+Verifique se os serviços apresentam o status `Up`.
 
 ### 6. Consultar os logs
 
-Para acompanhar os logs de todos os serviços:
+Para acompanhar os registros de execução:
 
 ```bash
 docker compose logs -f
@@ -140,104 +246,34 @@ Para visualizar somente os logs da API:
 docker compose logs -f api
 ```
 
-Para visualizar somente os logs da IA:
+Para visualizar somente os logs do serviço de IA:
 
 ```bash
 docker compose logs -f ml-service
 ```
 
-Para sair da visualização dos logs, pressione `Ctrl + C`. Isso encerra a visualização, não necessariamente os containers.
+Para sair da visualização, pressione `Ctrl + C`.
 
 ---
 
-## 🧠 Serviço de Inteligência Artificial
+## 🔌 API REST
 
-O serviço de IA está implementado em Python utilizando FastAPI. Ele carrega o modelo treinado armazenado em `modelos/classificador.joblib` e disponibiliza um endpoint para classificação dos dados fisiológicos.
+A API REST foi desenvolvida com Node.js e Express e funciona como ponto central de comunicação entre os componentes do BUBATAG.
 
-O modelo recebe:
+### Verificação de funcionamento
 
-- `temperatura`: temperatura corporal em graus Celsius.
-- `batimento_cardiaco`: frequência cardíaca em batimentos por minuto.
-
-O serviço retorna o resultado da classificação, o identificador do modelo e a indicação de que a classificação foi realizada com dados simulados no treinamento experimental.
-
-### Verificar a saúde do serviço
-
-Endpoint:
-
-```http
-GET http://localhost:8000/health
-```
-
-Exemplo de resposta:
-
-```json
-{
-  "status": "OK",
-  "servico": "Bubatag ML",
-  "modelo_carregado": true,
-  "versao": "1.0.0"
-}
-```
-
-### Classificar dados fisiológicos
-
-Endpoint:
-
-```http
-POST http://localhost:8000/classificar
-Content-Type: application/json
-```
-
-Exemplo de requisição:
-
-```json
-{
-  "temperatura": 39.0,
-  "batimento_cardiaco": 90
-}
-```
-
-Exemplo ilustrativo de resposta:
-
-```json
-{
-  "sucesso": true,
-  "estado": "Estressado",
-  "modelo": "bubatag-ml-v1",
-  "origem_dados": "modelo experimental treinado com dados simulados"
-}
-```
-
-O resultado depende do modelo carregado e dos dados enviados. O exemplo não representa uma validação clínica.
-
----
-
-## 🔌 API Bubatag
-
-A API REST, implementada com Node.js e Express, funciona como ponto de entrada para as operações do sistema.
-
-Entre suas responsabilidades estão:
-
-- Receber e validar os dados de telemetria.
-- Identificar a coleira e o animal associados.
-- Encaminhar os dados para análise quando necessário.
-- Persistir as informações no MongoDB.
-- Disponibilizar informações para consulta e geração de relatórios.
-
-### Verificar a saúde da API
+Para verificar se a API está respondendo, utilize:
 
 ```http
 GET http://localhost:3000/health
 ```
 
-### Registrar telemetria
+### Registro de telemetria
 
-Endpoint:
+A API disponibiliza um endpoint para receber os dados coletados pelas coleiras inteligentes:
 
 ```http
 POST http://localhost:3000/api/telemetria/registro
-Content-Type: application/json
 ```
 
 Exemplo de requisição:
@@ -250,108 +286,184 @@ Exemplo de requisição:
 }
 ```
 
-Exemplo ilustrativo de resposta:
-
-```json
-{
-  "sucesso": true,
-  "n_coleira": "COL-TESTE-001",
-  "n_etiqueta": "ETQ-TESTE-001",
-  "status_estresse": "Estressado",
-  "nivel_alerta": "MEDIO",
-  "classificacao_disponivel": true,
-  "mensagem": "Telemetria salva com sucesso."
-}
-```
-
-A resposta real também pode incluir o horário do registro. Os valores apresentados são exemplos baseados nos testes realizados.
+O sistema utiliza essas informações para identificar a coleira, associar o registro ao animal correspondente, realizar o processamento necessário e armazenar os dados.
 
 ### Relatórios
 
-A API também disponibiliza uma rota para consultar o relatório de uma coleira:
+Também existe uma rota para consultar informações relacionadas a uma coleira:
 
 ```http
 GET http://localhost:3000/api/relatorios/coleira/COL-TESTE-001
 ```
 
-O resultado depende dos registros disponíveis no banco e das regras implementadas no serviço de relatórios.
+O resultado depende dos registros disponíveis no banco de dados e das regras implementadas no serviço de relatórios.
 
 ---
 
-## 🔄 Fluxo de processamento
+## 🧠 Inteligência Artificial e Machine Learning
 
-1. A API recebe os dados de temperatura e frequência cardíaca.
-2. Os dados passam pelas validações da API.
-3. A API identifica a coleira e o animal associado.
-4. O serviço de classificação é utilizado quando a classificação não é fornecida manualmente.
-5. O resultado da análise é associado à telemetria.
-6. A API persiste os registros no MongoDB e retorna uma resposta ao cliente.
+Um dos diferenciais do BUBATAG é a utilização de Inteligência Artificial para auxiliar na identificação de possíveis sinais de estresse nos bubalinos.
+
+O serviço de classificação foi desenvolvido em Python utilizando FastAPI e trabalha integrado à API principal.
+
+### Dados utilizados
+
+O modelo recebe informações fisiológicas dos animais, incluindo:
+
+| Variável | Descrição |
+|---|---|
+| Temperatura | Temperatura corporal do animal em graus Celsius. |
+| Frequência cardíaca | Quantidade de batimentos cardíacos por minuto. |
+
+### Verificação do serviço
+
+Para verificar se o serviço de IA está funcionando:
+
+```http
+GET http://localhost:8000/health
+```
+
+### Classificação dos dados
+
+O serviço disponibiliza o seguinte endpoint:
+
+```http
+POST http://localhost:8000/classificar
+```
+
+Exemplo de requisição:
+
+```json
+{
+  "temperatura": 39.0,
+  "batimento_cardiaco": 90
+}
+```
+
+O serviço retorna informações relacionadas à classificação, incluindo o estado identificado e a identificação do modelo utilizado.
+
+**Importante:** o modelo documentado atualmente possui caráter experimental e utiliza dados simulados no treinamento. Seus resultados não devem ser interpretados como diagnóstico veterinário ou validação clínica.
 
 ---
 
-## 🗄️ Persistência de dados
+## 🔄 Fluxo de Processamento dos Dados
 
-O MongoDB é executado em um container próprio e utiliza um volume Docker para manter os dados entre reinicializações dos containers.
+O processamento das informações acontece por meio da integração entre os diferentes componentes do sistema.
 
-Para listar os bancos disponíveis:
+1. Os sensores instalados nas coleiras coletam informações fisiológicas dos animais.
+2. Os dados são enviados para a API-BUBATAG.
+3. A API realiza as validações necessárias.
+4. O sistema identifica a coleira e o animal associados ao registro.
+5. Os dados são encaminhados para classificação quando necessário.
+6. O serviço de Inteligência Artificial processa as informações.
+7. O resultado da classificação é associado à telemetria.
+8. Os registros são armazenados no MongoDB.
+9. As informações ficam disponíveis para consulta pelas aplicações da plataforma.
+
+---
+
+## 🗄️ Banco de Dados
+
+O projeto utiliza o **MongoDB** para armazenar as informações necessárias ao funcionamento do sistema.
+
+O banco é executado em um container independente e utiliza um volume Docker para preservar os dados entre reinicializações.
+
+### Consultar os bancos disponíveis
 
 ```bash
 docker exec bubatag-mongo mongosh --eval "show dbs"
 ```
 
-Para acessar o banco `bubatag`:
+### Acessar o banco BUBATAG
 
 ```bash
 docker exec -it bubatag-mongo mongosh bubatag
 ```
 
-Dentro do shell do MongoDB, podem ser executadas consultas para inspecionar as coleções e os registros. Para sair:
+Dentro do terminal do MongoDB, é possível consultar as coleções e os registros armazenados.
 
-```javascript
+Para sair:
+
+```bash
 exit
 ```
 
-**Atenção:** evite executar `docker compose down -v` em um ambiente com dados que precisam ser preservados, pois a opção `-v` remove os volumes associados ao projeto.
+**Atenção:** evite utilizar `docker compose down -v` quando houver dados que precisam ser preservados, pois esse comando remove os volumes associados ao projeto.
 
 ---
 
-## 🛑 Como parar e iniciar novamente
+## 🛑 Gerenciamento dos Containers
 
-Parar os containers sem remover o volume do banco:
+Alguns comandos úteis para administrar o ambiente:
+
+**Parar os serviços:**
 
 ```bash
 docker compose down
 ```
 
-Iniciar novamente os serviços já construídos:
+**Iniciar novamente:**
 
 ```bash
 docker compose up -d
 ```
 
-Reconstruir as imagens após alterações no código:
+**Reconstruir os containers após alterações:**
 
 ```bash
 docker compose up -d --build
 ```
 
-Os dados do MongoDB são mantidos no volume nomeado enquanto esse volume não for removido.
+**Consultar os containers em execução:**
+
+```bash
+docker compose ps
+```
+
+**Visualizar os logs:**
+
+```bash
+docker compose logs -f
+```
 
 ---
 
-## 🧪 Testes realizados
+## 🧪 Testes e Validação
 
-Durante a configuração do ambiente, foram realizados os seguintes testes:
+Durante o desenvolvimento e a integração dos serviços, foram contemplados testes relacionados a:
 
-- Inicialização dos três containers.
-- Verificação do endpoint `/health` da API.
-- Verificação do endpoint `/health` do serviço de IA.
-- Classificação de dados fisiológicos no endpoint `/classificar`.
-- Comunicação entre a API e o serviço de IA pela rede Docker.
-- Registro de telemetria pela API.
-- Confirmação da resposta de sucesso e da persistência dos dados.
+- Inicialização dos containers Docker.
+- Verificação de funcionamento da API REST.
+- Verificação de funcionamento do serviço de IA.
+- Comunicação entre os serviços pela rede Docker.
+- Classificação de dados fisiológicos.
+- Registro de informações de telemetria.
+- Persistência dos dados no MongoDB.
+- Consulta de informações e relatórios.
 
-Os testes demonstram o funcionamento técnico da integração. A validação da precisão do modelo com medições reais, critérios zootécnicos e amostras representativas ainda é uma etapa necessária.
+A validação técnica da comunicação entre os serviços é uma etapa importante para garantir o funcionamento da arquitetura.
+
+A precisão dos modelos de Machine Learning, por sua vez, depende da utilização de dados reais, representativos e devidamente validados.
 
 ---
 
+## 🔗 Integração com os Demais Projetos
+
+O API-BUBATAG faz parte de um ecossistema de desenvolvimento que integra diferentes tecnologias para viabilizar o monitoramento inteligente de bubalinos.
+
+| Repositório | Responsabilidade |
+|---|---|
+| [BUBATAG](https://github.com/bubatag/bubatag) | Apresentação institucional e visão geral do projeto. |
+| [sistema-frontend](https://github.com/bubatag/sistema-frontend) | Interface de gerenciamento e visualização das informações. |
+| [DB-BUBATAG](https://github.com/bubatag/DB-BUBATAG) | Modelagem e organização dos bancos de dados do projeto. |
+| [API-bubatag](https://github.com/bubatag/API-bubatag) | API, processamento de dados e serviços de inteligência. |
+
+A integração desses componentes permite conectar os dispositivos IoT, o armazenamento de informações e as interfaces utilizadas pelos produtores.
+
+## 👥 Equipe de Desenvolvimento
+
+O API-BUBATAG integra o desenvolvimento da plataforma **BUBATAG**, projeto que une tecnologia, Internet das Coisas, Inteligência Artificial e pecuária bubalina.
+
+Conheça a organização e acompanhe os demais repositórios:
+
+🐃 [GitHub — BUBATAG](https://github.com/bubatag)
