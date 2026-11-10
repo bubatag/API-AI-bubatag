@@ -7,6 +7,7 @@ const bubalinoRoutes = require('./routes/bubalinoRoutes');
 const telemetriaRoutes = require('./routes/telemetriaRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const reportRoutes = require('./routes/reportRoutes');
+const sincronizacaoRoutes = require('./routes/sincronizacaoRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/coleiras', coleiraRoutes);
 app.use('/api/bubalinos', bubalinoRoutes);
 app.use('/api/telemetria', telemetriaRoutes);
 app.use('/api/relatorios', reportRoutes);
+app.use('/api/sincronizacao', sincronizacaoRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

@@ -8,8 +8,14 @@ function criarErro(mensagem, status) {
 
 class ColeiraService {
   // Cadastra uma coleira sem exigir um bubalino associado.
-  async cadastrarParaUsuario(usuarioId, dadosColeira) {
-    const usuario = await Usuario.findById(usuarioId);
+  async cadastrarParaUsuario(usuarioId, dadosColeira, session = null) {
+    let consulta = Usuario.findById(usuarioId);
+
+    if (session) {
+      consulta = consulta.session(session);
+    }
+
+    const usuario = await consulta;
 
     if (!usuario) {
       throw criarErro('Usuário não encontrado.', 404);
@@ -51,7 +57,7 @@ class ColeiraService {
       historico_vinculos: [],
     });
 
-    await usuario.save();
+    await usuario.save(session ? { session } : {});
 
     return usuario.coleiras[usuario.coleiras.length - 1];
   }
@@ -98,8 +104,19 @@ class ColeiraService {
   }
 
   // Cadastra um bubalino independente e associa à coleira.
-  async associarBubalino(usuarioId, coleiraId, dadosBubalino) {
-    const usuario = await Usuario.findById(usuarioId);
+  async associarBubalino(
+    usuarioId,
+    coleiraId,
+    dadosBubalino,
+    session = null
+  ) {
+    let consulta = Usuario.findById(usuarioId);
+
+    if (session) {
+      consulta = consulta.session(session);
+    }
+
+    const usuario = await consulta;
 
     if (!usuario) {
       throw criarErro('Usuário não encontrado.', 404);
@@ -193,7 +210,7 @@ class ColeiraService {
       ativo: true,
     });
 
-    await usuario.save();
+    await usuario.save(session ? { session } : {});
 
     return {
       coleira,
@@ -533,4 +550,3 @@ class ColeiraService {
 }
 
 module.exports = new ColeiraService();
-
