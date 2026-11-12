@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const OperacaoSincronizacaoSchema = new mongoose.Schema(
@@ -27,12 +28,17 @@ const OperacaoSincronizacaoSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ['processando', 'concluida'],
+      enum: ['processando', 'concluida', 'falhou'],
       default: 'processando'
     },
 
     resultado: {
       type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+
+    erro: {
+      type: String,
       default: null
     }
   },

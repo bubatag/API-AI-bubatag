@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const DadoBiometricoSchema = new mongoose.Schema({
@@ -80,6 +81,10 @@ const BubalinoSchema = new mongoose.Schema({
     enum: ['Macho', 'Fêmea'],
     required: true
   },
+  operationId: {
+    type: String,
+    default: null
+  },
   ativo: {
     type: Boolean,
     default: true
@@ -136,6 +141,10 @@ const ColeiraSchema = new mongoose.Schema({
   IP: {
     type: String,
     required: true
+  },
+  operationId: {
+    type: String,
+    default: null
   },
   ativo: {
     type: Boolean,

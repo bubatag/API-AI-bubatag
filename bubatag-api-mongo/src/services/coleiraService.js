@@ -1,3 +1,4 @@
+
 const Usuario = require('../models/Usuario');
 
 function criarErro(mensagem, status) {
@@ -19,6 +20,21 @@ class ColeiraService {
 
     if (!usuario) {
       throw criarErro('Usuário não encontrado.', 404);
+    }
+
+    const operationId = String(
+      dadosColeira?.operationId || ''
+    ).trim();
+
+    // Impede a criação duplicada quando a mesma operação é reenviada.
+    if (operationId) {
+      const coleiraExistente = (usuario.coleiras || []).find(
+        (coleira) => coleira.operationId === operationId
+      );
+
+      if (coleiraExistente) {
+        return coleiraExistente;
+      }
     }
 
     const nColeira = String(dadosColeira?.n_coleira || '').trim();
@@ -51,6 +67,7 @@ class ColeiraService {
       n_coleira: nColeira,
       coleira_localizacao: localizacao,
       IP: ip,
+      operationId: operationId || null,
       ativo: true,
       excluido_em: null,
       bubalino_id: null,
@@ -122,6 +139,30 @@ class ColeiraService {
       throw criarErro('Usuário não encontrado.', 404);
     }
 
+    const operationId = String(
+      dadosBubalino?.operationId || ''
+    ).trim();
+
+    // Verifica se o bubalino já foi cadastrado por essa operação.
+    if (operationId) {
+      const bubalinoExistente = (usuario.bubalinos || []).find(
+        (bubalino) => bubalino.operationId === operationId
+      );
+
+      if (bubalinoExistente) {
+        const coleiraExistente = (usuario.coleiras || []).find(
+          (coleira) =>
+            String(coleira.bubalino_id) ===
+            String(bubalinoExistente._id)
+        );
+
+        return {
+          coleira: coleiraExistente || null,
+          bubalino: bubalinoExistente,
+        };
+      }
+    }
+
     const coleira = usuario.coleiras.id(coleiraId);
 
     if (!coleira) {
@@ -146,7 +187,17 @@ class ColeiraService {
     const raca = String(dadosBubalino?.raca || '').trim();
     const etiqueta = String(dadosBubalino?.n_etiqueta || '').trim();
     const dtNasc = dadosBubalino?.dt_nasc;
-    const sexo = dadosBubalino?.sexo;
+
+    const sexoInformado = String(dadosBubalino?.sexo || '')
+      .trim()
+      .normalize('NFC')
+      .toLocaleLowerCase('pt-BR');
+
+    const sexo = sexoInformado === 'macho'
+      ? 'Macho'
+      : sexoInformado === 'fêmea'
+        ? 'Fêmea'
+        : '';
 
     if (!raca || !etiqueta || !dtNasc || !sexo) {
       throw criarErro(
@@ -191,6 +242,7 @@ class ColeiraService {
       n_etiqueta: etiqueta,
       dt_nasc: dataNascimento,
       sexo,
+      operationId: operationId || null,
       ativo: dadosBubalino.ativo ?? true,
       excluido_em: null,
       dados: [],
